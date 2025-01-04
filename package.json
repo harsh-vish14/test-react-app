@@ -14,6 +14,7 @@
     "web-vitals": "^4.2.4"
   },
   "scripts": {
+    "git-deploy": "npm run deploy && git push origin master",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "start": "react-scripts start",
