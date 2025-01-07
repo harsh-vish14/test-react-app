@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+        rel="stylesheet">
+
+</head>
+<style>
+    * {
+        padding: 0px;
+        margin: 0px;
+        box-sizing: border-box;
+        font-family: "Roboto", serif;
+    }
+
+    th {
+        border: 1px solid rgb(224, 224, 224);
+        background-color: rgb(245, 245, 245);
+        text-align: left;
+        color: rgb(17, 17, 17);
+        font-feature-settings: "liga" 0, "clig" 0;
+        /* font-family: Roboto; */
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+        letter-spacing: 0.15px;
+        padding: 30px 0px 30px 30px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    thead {
+        text-align: left;
+    }
+
+    td {
+        border: 1px solid rgb(224, 224, 224);
+        padding: 12px;
+
+
+    }
+
+    .message {
+        background: rgb(249, 249, 249);
+        margin: 8px 0px;
+        padding: 12px 16px;
+        font-size: 16px;
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 4px;
+        border-radius: 4px;
+        position: relative;
+        width: 100%;
+    }
+
+    .message:hover {
+        background: rgb(241, 241, 241);
+    }
+
+    button,
+    [role="button"] {
+        all: unset;
+        cursor: pointer;
+        background-color: transparent;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    button:hover,
+    [role="button"]:hover {
+        color: blue;
+    }
+
+    .td-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        border-radius: 4px;
+        width: 100%;
+    }
+
+    .messages,
+    .status-container {
+        width: 100%;
+    }
+
+    .status-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .status-container>select {
+        flex-shrink: 0;
+        width: 164px;
+        height: 48px;
+        padding: 10px;
+        font-size: 16px;
+        margin: 8px;
+        border-radius: 4px;
+        border: 1px solid rgb(204, 204, 204);
+        appearance: none;
+        background: url("data:image/svg+xml;utf8,<svg fill=\"%23333\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>") right 10px center / 20px 20px no-repeat;
+    }
+
+    .status-container>.message {
+        width: auto;
+    }
+
+    .closed>.content {
+        display: none;
+    }
+
+    .opened>.content {
+        display: block;
+    }
+
+    .opened,
+    .closed {
+        border: 1px solid rgb(204, 204, 204);
+        border-radius: 4px;
+    }
+
+    .tab-user {
+        padding: 20px;
+        opacity: 0.7;
+        font-size: 18px;
+        font-weight: 500;
+        text-transform: capitalize;
+        position: relative;
+    }
+
+    .tab-user::before {
+        content: "";
+        position: absolute;
+        height: 24px;
+        width: 24px;
+        top: 18px;
+        right: 20px;
+        background: url("data:image/svg+xml;utf8,<svg fill=\"%23333\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M7 10l5 5 5-5z\"/></svg>") center center / 20px 20px no-repeat;
+        transition: 0.5s;
+    }
+
+    .opened>.tab-user::before {
+        transform: rotate(180deg);
+    }
+
+    .closed>.tab-user::before {
+        transform: rotate(0deg);
+    }
+
+    .collapsed_menu {
+        cursor: pointer;
+    }
+</style>
+
+<body>
+    <div id="tab_list">
+    </div>
+
+    <script>
+        let data = [
+            {
+                "id": 12,
+                "what_went_well": null,
+                "what_couldve_been_better": null,
+                "development_plan": [
+                    {
+                        "text": "studio dron",
+                        "status": "WIP"
+                    },
+                    {
+                        "text": "aaabsdc",
+                        "status": "NOT STARTED"
+                    }
+                ],
+                "uid": 2,
+                "work_email": "harsh@fancode.com",
+                "full_name": "reportee harsh"
+            },
+            {
+                "id": null,
+                "what_went_well": null,
+                "what_couldve_been_better": null,
+                "development_plan": [
+                    {
+                        "text": "studio dron",
+                        "status": "WIP"
+                    },
+                    {
+                        "text": "aaabsdc",
+                        "status": "NOT STARTED"
+                    }
+                ],
+                "uid": 3,
+                "work_email": "harsh@fancode.com",
+                "full_name": "reportee harsh 2"
+            }
+        ];
+        let new_list = [];
+
+        // Callback function to handle incoming payload
+        const callback = function (payload) {
+            if (payload.type === "setValue") {
+
+                const val = JSON.parse(payload.value);
+                if (val["open_all"]) {
+                    open_all_tabs();
+                }
+                // new_list = val["data"]
+                ui_generator(val["data"]);
+            }
+        };
+        // CI.init(callback);
+
+        const generate_ui = (data) => {
+
+            let user_tab_div = `<div class="collapsed_menu tab-user" onclick="tabClicked(this)" id="${data.uid}">${data.full_name}</div>`
+
+            // table generator
+            let what_went_well = ``;
+            let what_couldve_been_better = ``;
+            let development_plan = ``;
+            let text = {
+                "what_went_well": "",
+                "what_couldve_been_better": "",
+                "development_plan": "",
+            }
+            if (data.what_went_well) {
+                let arr_what_went_well = (data.what_went_well).split("\n")
+                text["what_went_well"] = (data.what_went_well).replaceAll("\n", "\\n");
+                for (let i = 0; i < arr_what_went_well.length; i++) {
+                    what_went_well += `<div class="message">${arr_what_went_well[i]}</div>`
+                }
+            }
+
+            if (data.what_couldve_been_better) {
+                let arr_what_couldve_been_better = (data.what_couldve_been_better).split("\n")
+                text["what_couldve_been_better"] = (data.what_couldve_been_better).replaceAll("\n", "\\n");;
+                for (let i = 0; i < arr_what_couldve_been_better.length; i++) {
+                    what_couldve_been_better += `<div class="message">${arr_what_couldve_been_better[i]}</div>`
+                }
+            }
+
+            if (data.development_plan) {
+                let arr_development_plan = data.development_plan
+                let string_text = []
+                for (let i = 0; i < arr_development_plan.length; i++) {
+                    string_text.push(arr_development_plan[i].text);
+                    development_plan += `
+                    <div class="status-container">
+                                    <div class="message">${arr_development_plan[i].text}</div>
+                                    <select class="sc-jRHPII ekRUfr" onchange="status_change(this)" asses_id="${data['id']}" index="${i}">
+                                        <option value="NOT STARTED" ${arr_development_plan[i].status == "NOT STARTED" && "selected"}>NOT STARTED</option>
+                                        <option value="WIP" ${arr_development_plan[i].status == "WIP" && "selected"}>WIP</option>
+                                        <option value="COMPLETED" ${arr_development_plan[i].status == "COMPLETED" && "selected"}>COMPLETED</option>
+                                    </select>
+                                </div>
+    `
+                }
+                text["development_plan"] = string_text.join("\\n");
+            }
+
+
+            return `
+            <div class="closed">
+            ${user_tab_div}
+            <div class="content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>What went well</th>
+                            <th>What could've been better</th>
+                            <th>Development Plan</th>
+                            <!-- <th></th> -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="td-container">
+                                    ${what_went_well}
+                                    <button type="button" onclick="edit_clicked('what_went_well','${text["what_went_well"]}','${data.uid}')">EDIT</button>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="td-container">
+                                    ${what_couldve_been_better}
+                                    <button type="button"
+                                        onclick="edit_clicked('what_couldve_been_better', '${text["what_couldve_been_better"]}','${data.uid}')">EDIT</button>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="td-container">
+                                    ${development_plan}
+                                    <button type="button" onclick="edit_clicked('development_plan', '${text["development_plan"]}','${data.uid}')">EDIT</button>
+                                </div>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+            `
+
+            // document.querySelector("#what_went_well").innerHTML = what_went_well
+            // document.querySelector("#what_couldve_been_better").innerHTML = what_couldve_been_better
+            // document.querySelector("#development_plan").innerHTML = development_plan
+        }
+
+        const status_change = (ele) => {
+            let uid = null;
+            let vals = ({ value: ele.value, index: ele.getAttribute("index"), asses_id: ele.getAttribute("asses_id") });
+            console.log({ vals, new_list })
+            for (let i = 0; i < new_list.length; i++) {
+                if (new_list[i].id == vals.asses_id) {
+                    uid = new_list[i].uid;
+                    new_list[i].development_plan[vals.index].status = vals.value;
+                    console.log(new_list[i].development_plan);
+                }
+
+            }
+
+            if (!uid) {
+                return;
+            }
+
+            console.log({
+                uid,
+                json: new_list
+            })
+            CI.returnValue({
+                uid: data.uid,
+                json: new_list
+            });
+            CI.triggerChange();
+            CI.triggerAction("status_changed");
+
+        }
+
+        const ui_generator = (list) => {
+            new_list = list;
+            let html_content = ``
+            for (let i = 0; i < list.length; i++) {
+                html_content += generate_ui(list[i]);
+            }
+            document.querySelector("#tab_list").innerHTML = html_content;
+        }
+
+        ui_generator(data);
+
+        const edit_clicked = (type, message, id) => {
+            console.log({
+                type,
+                message,
+                id
+            })
+            CI.returnValue({
+                type,
+                message
+            });
+            CI.triggerChange();
+            CI.triggerAction("edit_checked");
+        };
+
+        const open_all_tabs = () => {
+            document.querySelectorAll(".closed").forEach((ele) => { ele.classList.remove("closed"); ele.classList.add("opened") })
+        }
+
+
+        const tabClicked = (tab) => {
+
+            if (tab.parentElement.classList.contains("opened")) {
+                tab.parentElement.classList.remove("opened");
+                tab.parentElement.classList.add("closed");
+            } else {
+                tab.parentElement.classList.add("opened");
+                tab.parentElement.classList.remove("closed");
+            }
+        };
+
+    </script>
+</body>
+
+</html>
